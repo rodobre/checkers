@@ -65,7 +65,7 @@ class Board:
 
     def get_at(self, key):
         if not isinstance(key, tuple):
-            raise Exception('Board key is not a tuple! Got \'{}\' instead.'.format(type(key)))
+            raise Exception('Board key is not a tuple! Got \'{}\' instead. [{}]'.format(type(key), key))
 
         if len(key) != 2:
             raise Exception('Board key does not represent a coordinate! Size: {}'.format(len(key)))
