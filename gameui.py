@@ -155,7 +155,7 @@ class GameUI:
                         continue
 
                     pos = pygame.mouse.get_pos()
-                    max_dist = 50
+                    max_dist = 110
 
                     if sprite_in_question == None:
                         clicked_sprites = [min([(s, math.sqrt((pos[0] - s.x) * (pos[0] - s.x) + (pos[1] - s.y) * (pos[1] - s.y))) for s in self.sprite_rects], key=lambda x : x[1])]
@@ -211,6 +211,7 @@ class GameUI:
                             print(f'Player took turn lasting {int(timestamp_end - timestamp_start)} ms')
 
                             self.logic.human_turn = not self.logic.human_turn
+                            self.logic.check_if_won('black')
                             self.logic.ai_turn()
                             self.logic.check_if_won('white')
                             timestamp_start = time.time() * 1000

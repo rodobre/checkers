@@ -5,13 +5,14 @@ import sys
 import time
 
 class CheckersLogic:
-    def __init__(self):
+    def __init__(self, tree_depth, algorithm):
         self.board = Board(8, 8, options={None: 1, 'white': 1, 'black': 1})
         self.piece_map = {}
         self.piece_total = 0
         self.piece_ctr = 0
         self.human_turn = True
-        self.tree_depth = 5
+        self.tree_depth = tree_depth
+        self.algo_choice = 0 if algorithm == 'minimax' else 1
         self.timestamp_start = time.time() * 1000
         self.ai = CheckersAI()
 
@@ -104,6 +105,7 @@ class CheckersLogic:
         opponent_pieces = self.board.get_player_pieces(opponent)
         if len(opponent_pieces) == 0:
             print(f'[LOGIC] Player {player} has won the game, lack of opponent pieces')
+            sys.exit(0)
             return True
 
         total_moves, total_jumps = [], []
@@ -160,7 +162,12 @@ class CheckersLogic:
 
     def ai_turn(self):
         timestamp_start = time.time() * 1000
-        value, origin, move = self.ai.alpha_beta_pruning(self, 'white', self.tree_depth)
+        
+        if self.algo_choice == 0:
+            value, origin, move = self.ai.minimax(self, 'white', self.tree_depth)
+        else:
+            value, origin, move = self.ai.alpha_beta_pruning(self, 'white', self.tree_depth)
+
         print(f'AI Turn debug: {value} {origin} {move}')
         move = move[0]
         print(f'Computer moved with a cost of {value} [{origin}] -> [{move}]')
@@ -181,11 +188,16 @@ class CheckersLogic:
 
 if __name__ == '__main__':
     args = sys.argv
-    if len(args) != 2:
+    if len(args) != 4:
         print('Invalid arguments')
         sys.exit(0)
+    tree_depth = int(args[2])
+    algorithm = args[3]
 
-    logic = CheckersLogic()
+    if algorithm != 'minimax' and algorithm != 'abp':
+        print('Algorithm must be either \"minimax\" or \"abp\" for ab pruning')
+    
+    logic = CheckersLogic(tree_depth, algorithm)
     logic.init_pieces()
 
     if args[1] == 'gui':
