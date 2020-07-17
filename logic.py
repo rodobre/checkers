@@ -85,7 +85,8 @@ class CheckersLogic:
 
         for jump in jump_set:
             try:
-                if self.board.get_at((key[0] + jump[0] // 2, key[1] + jump[1] // 2)).get_player() == ('black' if is_white else 'white') and self.board.get_at((key[0] + jump[0], key[1] + jump[1])).get_player() == None:
+                if self.board.get_at((key[0] + jump[0] // 2, key[1] + jump[1] // 2)).get_player() == ('black' if is_white else 'white')  \
+                    and self.board.get_at((key[0] + jump[0], key[1] + jump[1])).get_player() == None:
                     if not absolute:
                         if (key[0] + jump[0]) >= 0 and (key[1] + jump[1]) >= 0 and (key[0] + jump[0]) <= 7 and (key[1] + jump[1]) <= 7:
                             jump_list += [jump]
@@ -108,16 +109,16 @@ class CheckersLogic:
             sys.exit(0)
             return True
 
-        total_moves, total_jumps = [], []
+        total_moves, total_jumps = 0,0
 
         for piece in opponent_pieces:
             tmp_moves = self.check_moves(piece.get_key())
             tmp_jumps = self.check_jumps(piece.get_key())
 
             if tmp_moves:
-                total_moves.append(tmp_moves)
+                total_moves += len(tmp_moves)
             if tmp_jumps:
-                total_jumps.append(tmp_jumps)
+                total_jumps += len(tmp_jumps)
 
         if total_moves + total_jumps == 0:
             print(f'[LOGIC] Player {player} has won the game, lack of opponent moves')
@@ -159,20 +160,37 @@ class CheckersLogic:
             print(f'Black [{(len(black_pieces) - black_kings) * 100 + black_kings * 150}] vs White [{(len(white_pieces) - white_kings) * 100 + white_kings * 150}]')
         
         self.print_time()
+    
+    def has_player_jumps(self, player):
+        player_pieces = self.board.get_player_pieces(player)
+        total_jumps = []
+        for piece in player_pieces:
+            tmp_jumps = self.check_jumps(piece.get_key())
+            if tmp_jumps:
+                total_jumps.append(tmp_jumps)
+        if total_jumps:
+            return True
+        return False
 
     def ai_turn(self):
         timestamp_start = time.time() * 1000
         
-        if self.algo_choice == 0:
-            value, origin, move = self.ai.minimax(self, 'white', self.tree_depth)
-        else:
-            value, origin, move = self.ai.alpha_beta_pruning(self, 'white', self.tree_depth)
+        while True:
+            if self.algo_choice == 0:
+                ai_consideration = self.ai.minimax(self, 'white', self.tree_depth)
+                value, origin, move = ai_consideration
+            else:
+                ai_consideration = self.ai.alpha_beta_pruning(self, 'white', self.tree_depth)
+                value, origin, move = ai_consideration
 
-        print(f'AI Turn debug: {value} {origin} {move}')
-        move = move[0]
-        print(f'Computer moved with a cost of {value} [{origin}] -> [{move}]')
+            print(f'Computer moved with a cost of {value} [{origin}] -> [{move}]')
+            self.make_move(origin, 'white', move)
+
+            is_it_a_jump = True if ((abs(move[0] - origin[0]) + abs(move[1] - origin[1])) > 2) else False
+            if not self.has_player_jumps('white') or not is_it_a_jump:
+                break
+
         self.human_turn = not self.human_turn
-        self.make_move(origin, 'white', move)
 
         timestamp_finish = time.time() * 1000 - timestamp_start
         print(f'AI took a turn which lasted {int(timestamp_finish)} ms')

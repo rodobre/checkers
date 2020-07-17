@@ -8,10 +8,10 @@ class CLI:
         self.board = board
         self.logic = logic_pfn
         self.no_piece = '_'
-        self.black_piece = '0'
-        self.white_piece = '1'
-        self.king_black = 'O'
-        self.king_white = 'I'
+        self.black_piece = 'b'
+        self.white_piece = 'w'
+        self.king_black = 'B'
+        self.king_white = 'W'
     
     def show(self):
         print('\n\n\n')
@@ -67,6 +67,9 @@ class CLI:
                 print('Total jumps len is {}'.format(len(total_jumps)))
                 print(total_jumps)
                 return (self.get_move(), timestamp_start)
+        else:
+            print('Invalid move!')
+            return self.get_move()
     
     def game_loop(self):
         while True:
